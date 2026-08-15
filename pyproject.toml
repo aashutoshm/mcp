@@ -13,7 +13,15 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
   "Werkzeug==3.1.3",
-  "pydantic~=2.11.7",
+  # Relaxed from `~=2.11.7` (LabGrid fork).
+  # pydantic 2.11.x resolves pydantic-core==2.33.2, which publishes no
+  # CPython 3.14 wheel; pip then builds it from Rust and its pyo3 0.24.1
+  # refuses any interpreter newer than 3.13, so installation fails outright
+  # on 3.14 (e.g. Frappe Cloud images). pydantic-core gained cp314 wheels
+  # at 2.46.1, first required by pydantic 2.13. The library itself needs no
+  # 2.11-specific API: tools/list, schema inference and tools/call all
+  # verified against pydantic 2.13.4 on CPython 3.14.
+  "pydantic>=2.13",
   "jsonschema (>=4.24.0,<5.0.0)",
   "Click>=8.1.8,<9",
 ]
