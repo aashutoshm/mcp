@@ -196,8 +196,12 @@ def get_descriptions(desc: str) -> tuple[str, dict[str, str]]:
         else:
             return desc, {}
 
+    # The Args section ends at the next unindented section header (Returns: etc.)
+    args_part = re.split(r'\n\s*\n(?=\S)', args_part, maxsplit=1)[0]
+
     arg_pattern = re.compile(
-        r'^\s*(\w+)\s*(?:\([^)]*\))?:\s*(.*?)(?=\n\s*\w+\s*(?:\(.*\))?:|\Z)',
+        r'^\s*(\w+)\s*(?:\([^)\n]*\))?:\s*(.*?)'
+        r'(?=\n[ \t]*\w+[ \t]*(?:\([^)\n]*\))?:|\Z)',
         re.MULTILINE | re.DOTALL,
     )
     arg_descriptions = {}

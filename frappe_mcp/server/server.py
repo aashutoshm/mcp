@@ -5,6 +5,7 @@ from collections import OrderedDict
 from collections.abc import Callable
 
 from pydantic import BaseModel, ValidationError
+from werkzeug.exceptions import BadRequest
 from werkzeug.wrappers import Request, Response
 
 import frappe_mcp.server.handlers as handlers
@@ -139,8 +140,12 @@ class MCP:
 
         try:
             data = request.get_json(force=True)
-        except json.JSONDecodeError:
+        except (BadRequest, json.JSONDecodeError):
             return handle_invalid(None, response, types.PARSE_ERROR, 'Parse error')
+
+        if not isinstance(data, dict):
+            # Batch requests (JSON arrays) are not supported.
+            return handle_invalid(None, response, types.INVALID_REQUEST, 'Invalid Request')
 
         if get_is_notification(data):
             return handle_notification(data, response)
